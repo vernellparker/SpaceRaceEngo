@@ -21,12 +21,11 @@ func (c *PlayerControlSystem) New(w *ecs.World) {
 	c.world = w
 }
 
-func (c *PlayerControlSystem) Add(b *ecs.BasicEntity, s *common.SpaceComponent, p *int, c2 *common.RenderComponent) {
+func (c *PlayerControlSystem) Add(b *ecs.BasicEntity, s *common.SpaceComponent, p *int) {
 	c.entities = append(c.entities, playerControlSystemEntity{
-		BasicEntity:     b,
-		SpaceComponent:  s,
-		playerId:        p,
-		RenderComponent: c2,
+		BasicEntity:    b,
+		SpaceComponent: s,
+		playerId:       p,
 	})
 }
 

@@ -73,8 +73,8 @@ func (m *mainScene) Setup(u engo.Updater) {
 			sys.Add(&spaceShipLeft.BasicEntity, &spaceShipLeft.RenderComponent, &spaceShipLeft.SpaceComponent)
 			sys.Add(&spaceShipRight.BasicEntity, &spaceShipRight.RenderComponent, &spaceShipRight.SpaceComponent)
 		case *systems.PlayerControlSystem:
-			sys.Add(&spaceShipLeft.BasicEntity, &spaceShipLeft.SpaceComponent, &spaceShipLeft.PlayerId, &spaceShipRight.RenderComponent)
-			sys.Add(&spaceShipRight.BasicEntity, &spaceShipRight.SpaceComponent, &spaceShipRight.PlayerId, &spaceShipRight.RenderComponent)
+			sys.Add(&spaceShipLeft.BasicEntity, &spaceShipLeft.SpaceComponent, &spaceShipLeft.PlayerId)
+			sys.Add(&spaceShipRight.BasicEntity, &spaceShipRight.SpaceComponent, &spaceShipRight.PlayerId)
 		}
 	}
 }
