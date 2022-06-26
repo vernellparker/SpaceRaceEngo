@@ -17,7 +17,11 @@ func (m *mainScene) Type() string { return "myGame" }
 // Preload is called before loading any assets from the disk,
 // to allow you to register / queue them
 func (m *mainScene) Preload() {
-	err := engo.Files.Load("textures/playerShip1_blue.png", "textures/playerShip1_green.png")
+	err := engo.Files.Load(
+		"textures/playerShip1_blue.png",
+		"textures/playerShip1_green.png",
+		"textures/meteorBrown_med1.png",
+	)
 	if err != nil {
 		return
 	}
@@ -33,6 +37,8 @@ func (m *mainScene) Setup(u engo.Updater) {
 	world.AddSystem(&common.RenderSystem{})
 
 	world.AddSystem(&systems.PlayerControlSystem{})
+	r := systems.RockSpawnSystemSystem{}
+	world.AddSystem(&r)
 
 	spaceShipLeft := entity.SpaceShip{BasicEntity: ecs.NewBasic(), PlayerId: 1}
 	spaceShipRight := entity.SpaceShip{BasicEntity: ecs.NewBasic(), PlayerId: 2}
@@ -75,8 +81,28 @@ func (m *mainScene) Setup(u engo.Updater) {
 		case *systems.PlayerControlSystem:
 			sys.Add(&spaceShipLeft.BasicEntity, &spaceShipLeft.SpaceComponent, &spaceShipLeft.PlayerId)
 			sys.Add(&spaceShipRight.BasicEntity, &spaceShipRight.SpaceComponent, &spaceShipRight.PlayerId)
+		case *systems.RockSpawnSystemSystem:
 		}
 	}
+
+	rockBrown1Texture, err := common.LoadedSprite("textures/meteorBrown_med1.png")
+	if err != nil {
+		panic(err)
+	}
+
+	for _, system := range world.Systems() {
+		switch sys := system.(type) {
+		case *common.RenderSystem:
+			sys.Add(&spaceShipLeft.BasicEntity, &spaceShipLeft.RenderComponent, &spaceShipLeft.SpaceComponent)
+			sys.Add(&spaceShipRight.BasicEntity, &spaceShipRight.RenderComponent, &spaceShipRight.SpaceComponent)
+		case *systems.PlayerControlSystem:
+			sys.Add(&spaceShipLeft.BasicEntity, &spaceShipLeft.SpaceComponent, &spaceShipLeft.PlayerId)
+			sys.Add(&spaceShipRight.BasicEntity, &spaceShipRight.SpaceComponent, &spaceShipRight.PlayerId)
+		case *systems.RockSpawnSystemSystem:
+			sys.Add(rockBrown1Texture)
+		}
+	}
+
 }
 
 func main() {

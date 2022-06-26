@@ -34,12 +34,12 @@ func (c *PlayerControlSystem) Update(dt float32) {
 
 	for _, e := range c.entities {
 		if btn1 := engo.Input.Button("A"); btn1.Down() {
-			if *e.playerId == 1 {
+			if *e.playerId == 1 && e.Position.Y >= 0 {
 				e.Position = engo.Point{X: e.Position.X, Y: e.Position.Y - moveSpeed}
 			}
 		}
 
-		if btn2 := engo.Input.Button("Up"); btn2.Down() {
+		if btn2 := engo.Input.Button("Up"); btn2.Down() && e.Position.Y >= 0 {
 			if *e.playerId == 2 {
 				e.Position = engo.Point{X: e.Position.X, Y: e.Position.Y - moveSpeed}
 			}
