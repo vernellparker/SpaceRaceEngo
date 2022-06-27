@@ -19,6 +19,19 @@ type PlayerControlSystem struct {
 
 func (c *PlayerControlSystem) New(w *ecs.World) {
 	c.world = w
+
+	engo.Mailbox.Listen("CollisionMessage", func(message engo.Message) {
+		collision, isCollision := message.(common.CollisionMessage)
+		if isCollision {
+			// See if we also have that Entity, and if so, change the speed
+			for _, e := range c.entities {
+
+				if e.ID() == collision.To.ID() {
+					e.Position.Y = engo.GameHeight() - e.Height - 20
+				}
+			}
+		}
+	})
 }
 
 func (c *PlayerControlSystem) Add(b *ecs.BasicEntity, s *common.SpaceComponent, p *int) {

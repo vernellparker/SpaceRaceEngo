@@ -11,5 +11,6 @@ type SpaceShip struct {
 	common.RenderComponent
 	common.SpaceComponent
 	components.Moveable
+	common.CollisionComponent
 	PlayerId int
 }

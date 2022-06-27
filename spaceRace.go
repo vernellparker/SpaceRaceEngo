@@ -35,6 +35,7 @@ func (m *mainScene) Setup(u engo.Updater) {
 
 	world, _ := u.(*ecs.World)
 	world.AddSystem(&common.RenderSystem{})
+	world.AddSystem(&common.CollisionSystem{Solids: 1})
 
 	world.AddSystem(&systems.PlayerControlSystem{})
 	r := systems.RockSpawnSystemSystem{}
@@ -53,6 +54,13 @@ func (m *mainScene) Setup(u engo.Updater) {
 		Height: 75,
 	}
 	spaceShipRight.Position = engo.Point{X: (engo.GameWidth() / 2) + (spaceShipRight.Width + 50/2), Y: engo.GameHeight() - spaceShipRight.Height - 20}
+
+	spaceShipLeft.CollisionComponent = common.CollisionComponent{
+		Group: 1,
+	}
+	spaceShipRight.CollisionComponent = common.CollisionComponent{
+		Group: 1,
+	}
 
 	spaceShipLeftTexture, err := common.LoadedSprite("textures/playerShip1_blue.png")
 	if err != nil {
@@ -81,7 +89,9 @@ func (m *mainScene) Setup(u engo.Updater) {
 		case *systems.PlayerControlSystem:
 			sys.Add(&spaceShipLeft.BasicEntity, &spaceShipLeft.SpaceComponent, &spaceShipLeft.PlayerId)
 			sys.Add(&spaceShipRight.BasicEntity, &spaceShipRight.SpaceComponent, &spaceShipRight.PlayerId)
-		case *systems.RockSpawnSystemSystem:
+		case *common.CollisionSystem:
+			sys.Add(&spaceShipLeft.BasicEntity, &spaceShipLeft.CollisionComponent, &spaceShipLeft.SpaceComponent)
+			sys.Add(&spaceShipRight.BasicEntity, &spaceShipRight.CollisionComponent, &spaceShipRight.SpaceComponent)
 		}
 	}
 

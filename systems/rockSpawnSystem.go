@@ -90,7 +90,9 @@ func (r *RockSpawnSystemSystem) CreateRockEntities(m *sync.Mutex, left bool) {
 	}
 
 	rock.Position = engo.Point{X: xPosition,
-		Y: float32(rd.Intn(int(engo.GameHeight()))) - rock.Height}
+		Y: float32(rd.Intn(int(engo.GameHeight()-100))) - rock.Height}
+
+	rock.CollisionComponent = common.CollisionComponent{Main: 1}
 
 	for _, system := range r.world.Systems() {
 		switch sys := system.(type) {
@@ -98,6 +100,11 @@ func (r *RockSpawnSystemSystem) CreateRockEntities(m *sync.Mutex, left bool) {
 			m.Lock()
 			sys.Add(&rock.BasicEntity, &rock.RenderComponent, &rock.SpaceComponent)
 			m.Unlock()
+		case *common.CollisionSystem:
+			m.Lock()
+			sys.Add(&rock.BasicEntity, &rock.CollisionComponent, &rock.SpaceComponent)
+			m.Unlock()
+
 		}
 
 		r.entities = append(r.entities, &rockSpawnSystemEntity{

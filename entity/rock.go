@@ -9,4 +9,5 @@ type Rock struct {
 	ecs.BasicEntity
 	common.RenderComponent
 	common.SpaceComponent
+	common.CollisionComponent
 }
