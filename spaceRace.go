@@ -4,6 +4,7 @@ import (
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
+	"image/color"
 	"spacerace/entity"
 	"spacerace/systems"
 )
@@ -21,6 +22,7 @@ func (m *mainScene) Preload() {
 		"textures/playerShip1_blue.png",
 		"textures/playerShip1_green.png",
 		"textures/meteorBrown_med1.png",
+		"fonts/PressStart2P-Regular.ttf",
 	)
 	if err != nil {
 		return
@@ -30,9 +32,12 @@ func (m *mainScene) Preload() {
 // Setup is called before the main loop starts. It allows you
 // to add entities and systems to your Scene.
 func (m *mainScene) Setup(u engo.Updater) {
+	//#region Input
 	engo.Input.RegisterButton("A", engo.KeyW)
 	engo.Input.RegisterButton("Up", engo.KeyArrowUp)
+	//#endregion Input
 
+	//#region Add Systems
 	world, _ := u.(*ecs.World)
 	world.AddSystem(&common.RenderSystem{})
 	world.AddSystem(&common.CollisionSystem{Solids: 1})
@@ -40,7 +45,9 @@ func (m *mainScene) Setup(u engo.Updater) {
 	world.AddSystem(&systems.PlayerControlSystem{})
 	r := systems.RockSpawnSystemSystem{}
 	world.AddSystem(&r)
+	//#endregion Add Systems
 
+	//#region SpaceShip Left
 	spaceShipLeft := entity.SpaceShip{BasicEntity: ecs.NewBasic(), PlayerId: 1}
 	spaceShipRight := entity.SpaceShip{BasicEntity: ecs.NewBasic(), PlayerId: 2}
 	spaceShipLeft.SpaceComponent = common.SpaceComponent{
@@ -48,23 +55,28 @@ func (m *mainScene) Setup(u engo.Updater) {
 		Height: 75,
 	}
 	spaceShipLeft.Position = engo.Point{X: (engo.GameWidth() / 2) - (spaceShipLeft.Width + 200/2), Y: engo.GameHeight() - spaceShipLeft.Height - 20}
+	spaceShipLeft.CollisionComponent = common.CollisionComponent{
+		Group: 1,
+	}
+	spaceShipLeftTexture, err := common.LoadedSprite("textures/playerShip1_blue.png")
+	if err != nil {
+		return
+	}
 
+	spaceShipLeft.RenderComponent = common.RenderComponent{
+		Drawable: spaceShipLeftTexture,
+		Scale:    engo.Point{X: 1.0, Y: 1.0},
+	}
+	//#endregion SpaceShip Left
+
+	//#region SpaceShip Right
 	spaceShipRight.SpaceComponent = common.SpaceComponent{
 		Width:  99,
 		Height: 75,
 	}
 	spaceShipRight.Position = engo.Point{X: (engo.GameWidth() / 2) + (spaceShipRight.Width + 50/2), Y: engo.GameHeight() - spaceShipRight.Height - 20}
-
-	spaceShipLeft.CollisionComponent = common.CollisionComponent{
-		Group: 1,
-	}
 	spaceShipRight.CollisionComponent = common.CollisionComponent{
 		Group: 1,
-	}
-
-	spaceShipLeftTexture, err := common.LoadedSprite("textures/playerShip1_blue.png")
-	if err != nil {
-		return
 	}
 
 	spaceShipRightTexture, err := common.LoadedSprite("textures/playerShip1_green.png")
@@ -76,10 +88,7 @@ func (m *mainScene) Setup(u engo.Updater) {
 		Drawable: spaceShipRightTexture,
 		Scale:    engo.Point{X: 1.0, Y: 1.0},
 	}
-	spaceShipLeft.RenderComponent = common.RenderComponent{
-		Drawable: spaceShipLeftTexture,
-		Scale:    engo.Point{X: 1.0, Y: 1.0},
-	}
+	//#endregion SpaceShip Right
 
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
@@ -110,6 +119,47 @@ func (m *mainScene) Setup(u engo.Updater) {
 			sys.Add(&spaceShipRight.BasicEntity, &spaceShipRight.SpaceComponent, &spaceShipRight.PlayerId)
 		case *systems.RockSpawnSystemSystem:
 			sys.Add(rockBrown1Texture)
+		}
+	}
+
+	fnt := &common.Font{
+		URL:  "fonts/PressStart2P-Regular.ttf",
+		FG:   color.White,
+		Size: 64,
+	}
+
+	err = fnt.CreatePreloaded()
+	if err != nil {
+		panic(err)
+	}
+
+	playerOneScore := entity.PlayerScore{BasicEntity: ecs.NewBasic()}
+	playerOneScore.RenderComponent.Drawable = common.Text{
+		Font: fnt,
+		Text: "0",
+	}
+	playerOneScore.SetShader(common.HUDShader)
+
+	playerOneScore.Position = engo.Point{
+		X: 100,
+		Y: engo.GameHeight() - spaceShipLeft.Height,
+	}
+	playerTwoScore := entity.PlayerScore{BasicEntity: ecs.NewBasic()}
+	playerTwoScore.RenderComponent.Drawable = common.Text{
+		Font: fnt,
+		Text: "0",
+	}
+	playerTwoScore.SetShader(common.HUDShader)
+
+	playerTwoScore.Position = engo.Point{
+		X: spaceShipRight.Position.X + 140,
+		Y: engo.GameHeight() - spaceShipLeft.Height,
+	}
+	for _, system := range world.Systems() {
+		switch sys := system.(type) {
+		case *common.RenderSystem:
+			sys.Add(&playerOneScore.BasicEntity, &playerOneScore.RenderComponent, &playerOneScore.SpaceComponent)
+			sys.Add(&playerTwoScore.BasicEntity, &playerTwoScore.RenderComponent, &playerTwoScore.SpaceComponent)
 		}
 	}
 
